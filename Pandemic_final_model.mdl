@@ -1,0 +1,448 @@
+{UTF-8}
+Recovery rate=Identified Infected * Immunity
+	~	1/Day
+	~	  Smoothed recovery rate with reduced maximum
+	|
+
+Testing Start Time=
+    30
+	~	Day
+	~	  Time delay before testing program begins
+	|
+
+Testing=IF THEN ELSE(Time >= Testing Start Time,
+    SMOOTH3(MIN(Infected, Testing accuracy*Testing Rate*Infected/MAX(1, Total population\
+		)), 2),
+    0)
+	~	People/Day
+	~	  Smoothed daily testing rate, begins after specified delay
+	|
+
+vaccination available=(0.04)*Medication research / Vaccine cost
+	~	People/Day
+	~	  Daily vaccine supply with proper unit conversion from funding to \
+		physical         vaccines
+	|
+
+Testing Cost=1000
+	~	 [0,10000]
+	~		|
+
+Vaccine cost=1000
+	~	 [0,10000]
+	~		|
+
+Testing Rate=MIN(1000, Government Investment*Testing fund percentage/ Testing Cost)
+	~	USD
+	~	  Bounded testing capacity
+	|
+
+Infection=MIN(Healthy non vaccinated people,
+    MIN(1000, Infected*Healthy non vaccinated people*Infection rate/MAX(100, Total population\
+		)))
+	~	People/Day
+	~	  Daily new infections with upper bound
+	|
+
+Max Vaccine=10
+	~	 [0,1000]
+	~		|
+
+Infection rate=(Virus mutation * (1 - Social distancing)) / Infection period
+	~	1/Day
+	~	  Per capita rate of new infections among susceptible population, reduced \
+		by social distancing
+	|
+
+Vaccination Start Time=
+    60
+	~	Day
+	~	  Time delay before vaccination program begins
+	|
+
+Vaccination=IF THEN ELSE(Time >= Vaccination Start Time,
+    MIN(Healthy non vaccinated people,
+        MIN(Healthy non vaccinated people*Vaccination rate , Max Vaccine)),
+    0)
+	~	People/Day
+	~	  Daily number of people receiving primary or booster vaccinations, with         \
+		safety limits. Starts after specified delay.
+	|
+
+Treatment Delay Time=7
+	~	Day [1,100]
+	~	  Average time required for treatment before patient can be discharged
+	|
+
+Rehabilitation=SMOOTH3(
+    MIN(Identified Infected, Identified Infected*Recovery rate),
+    Treatment Delay Time)
+	~	People/Day
+	~	  Smoothed recovery rate with capacity limits
+	|
+
+Social distancing=MIN(0.9, Civic Factor*Social Awareness Program Fund/MAX(1000, Total population\
+		))
+	~	Dmnl [0,1]
+	~	  Degree of contact reduction from baseline
+	|
+
+Mortality=Identified Infected * (Mortality Rate)
+	~	People/Day
+	~	  Daily deaths from the disease
+	|
+
+Breakthrough rate=
+    0.15/30
+	~	1/Day
+	~	  Daily rate at which vaccinated people become infected despite immunity
+	|
+
+Breakthrough=
+    Breakthrough rate*Healthy vaccinated people
+	~	People/Day
+	~	  Daily number of vaccinated people who become infected
+	|
+
+Campaign Fund Percentage=
+    0.2
+	~	Dmnl [0,1]
+	~	  Fraction of government funds allocated to awareness campaigns
+	|
+
+Civic Factor=
+    0.7
+	~	Dmnl [0,1]
+	~	  Population compliance factor with public health measures
+	|
+
+Death= INTEG (
+    Mortality,
+        0)
+	~	People
+	~	  Cumulative deaths from the disease
+	|
+
+Demand of vaccine=MIN(Healthy non vaccinated people * 0.05, Healthy non vaccinated people\
+		         * Civic Factor * Social Awareness Program Fund)
+	~	People/Day
+	~	  Daily population demand for vaccines with upper safety limit
+	|
+
+Discharged=SMOOTH3(Recovered * (0.2/7), 2)
+	~	People/Day
+	~	  Smoothed discharge rate with reduced flow
+	|
+
+Government Investment=1e+08
+	~	USD [0,1e+08]
+	~	  Total government funding for pandemic response
+	|
+
+Healthy non vaccinated people= INTEG (
+    -MIN(Healthy non vaccinated people, Infection + Vaccination),
+    100000)
+	~	People
+	~	  Population that has not been infected or vaccinated, with protection \
+		against negatives
+	|
+
+Healthy vaccinated people= INTEG (
+    MIN(Discharged + Vaccination, MAX(0, Total population)) - MIN(Breakthrough, Healthy vaccinated people\
+		),
+    0)
+	~	People
+	~	  Population that has been vaccinated and not currently infected
+	|
+
+Identified Infected= INTEG (
+    Testing - MIN(Identified Infected, Mortality + Rehabilitation),
+    0)
+	~	People
+	~	  Currently under treatment population
+	|
+
+Immunity=
+    0.7
+	~	Dmnl [0,1]
+	~	  Effectiveness factor of immunity in preventing severe disease
+	|
+
+Infected= INTEG (
+    MIN(Breakthrough + Infection, MAX(0, Total population)) - MIN(Testing, Infected),
+    1000)
+	~	People
+	~	  Currently infected but not yet identified population
+	|
+
+Total population=
+    Healthy non vaccinated people + Healthy vaccinated people + Infected + Identified Infected\
+		         + Recovered
+	~	People
+	~	  Dynamic calculation of total living population
+	|
+
+Medication Fund Percentage=
+    0.2
+	~	Dmnl [0,1]
+	~	  Fraction of government funds allocated to medication development
+	|
+
+Medication research=
+    MAX(0, Government Investment*Medication Fund Percentage)
+	~	USD
+	~	  Research funding for medication and vaccine development
+	|
+
+Mortality Rate=0.05
+	~	
+	~		|
+
+Recovered= INTEG (
+    Rehabilitation - MIN(Recovered, Discharged),
+    0)
+	~	People
+	~	  Recovered population awaiting discharge
+	|
+
+Social Awareness Program Fund=
+    Campaign Fund Percentage*Government Investment
+	~	USD
+	~	  Funding allocated to public health awareness campaigns
+	|
+
+Testing accuracy=0.4
+	~	Dmnl [0,1]
+	~	  Proportion of true positives correctly identified by tests
+	|
+
+Testing fund percentage=
+    0.3
+	~	Dmnl [0,1]
+	~	  Fraction of government funds allocated to testing infrastructure
+	|
+
+Virus mutation=0.1
+	~	Dmnl [0,1]
+	~	  Reduced transmissibility factor
+	|
+
+Vaccination rate=
+    MIN(0.05, MIN(Demand of vaccine/MAX(10, Healthy non vaccinated people), 
+        vaccination available/MAX(100, Healthy non vaccinated people)))
+	~	1/Day
+	~	  Fraction of eligible population receiving vaccination daily
+	|
+
+Infection period=1
+	~	1/Day [0,2]
+	~	  Base infection rate per contact before adjustments
+	|
+
+Economic Impact= INTEG (
+    Daily economic loss,
+        0)
+	~	USD
+	~	  Cumulative economic impact of the pandemic
+	|
+
+Daily economic loss=
+    (Infected + Identified Infected) * 50 + Social distancing * Total population * 0.1
+	~	USD/Day
+	~	  Daily economic cost due to illness and restrictions
+	|
+
+R0=
+    Infection rate * Infection duration
+	~	Dmnl
+	~	  Basic reproduction number; average number of secondary infections per \
+		case
+	|
+
+Infection duration=
+    10
+	~	Day
+	~	  Average duration of infectious period
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		        Simulation Control Parameters
+	|
+
+FINAL TIME  = 1095
+	~	Day
+	~	Simulation period to three years
+	|
+
+INITIAL TIME  = 0
+	~	Day
+	~	  The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Day [0,?]
+	~	  The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Day [0,?]
+	~	  Daily time steps for more granular analysis
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,68,2
+10,1,Identified Infected,1545,456,106,76,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,Infection rate,668,779,62,22,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,3,Death,1996,358,42,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,Recovered,1964,473,49,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,5,7,1,100,0,0,22,0,192,0,-1--1--1,,1|(1689,395)|
+1,6,7,3,4,0,0,22,0,192,0,-1--1--1,,1|(1733,358)|
+11,7,0,1733,395,6,8,34,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,8,Mortality,1790,395,51,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,Recovery rate,1631,674,43,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,10,Total population,862,882,51,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,11,Social distancing,1139,895,48,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,12,Virus mutation,301,1060,44,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,13,12,2,1,0,0,0,0,192,0,-1--1--1,,1|(547,1009)|
+10,14,Immunity,1787,834,46,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,15,14,9,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,16,Social Awareness Program Fund,499,553,74,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,17,Infection period,268,952,42,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,18,17,2,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,19,21,1,100,0,0,22,0,192,0,-1--1--1,,1|(1711,502)|
+1,20,21,4,4,0,0,22,0,192,0,-1--1--1,,1|(1778,473)|
+11,21,0,1778,502,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,22,Rehabilitation,1778,539,59,29,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,23,Healthy non vaccinated people,705,464,114,56,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,Healthy vaccinated people,749,179,69,43,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,25,27,23,100,0,0,22,0,192,0,-1--1--1,,1|(739,378)|
+1,26,27,24,4,0,0,22,0,192,0,-1--1--1,,1|(739,279)|
+11,27,0,739,342,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,28,Vaccination,789,342,42,35,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,29,Vaccination rate,537,356,54,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,30,29,28,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,31,vaccination available,343,329,53,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,32,31,29,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,33,Demand of vaccine,295,420,74,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,34,33,29,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,35,Government Investment,281,732,59,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,36,35,16,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,37,16,33,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,38,Medication research,243,527,52,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,39,35,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,40,38,31,1,0,0,0,0,192,0,-1--1--1,,1|(218,385)|
+1,41,16,11,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,42,Infected,1067,475,71,53,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,43,45,24,100,0,0,22,0,192,0,-1--1--1,,1|(926,219)|
+1,44,45,42,4,0,0,22,0,192,0,-1--1--1,,1|(1042,323)|
+11,45,0,1042,219,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,46,Breakthrough,1092,219,42,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,47,49,23,100,0,0,22,0,192,0,-1--1--1,,1|(864,457)|
+1,48,49,42,4,0,0,22,0,192,0,-1--1--1,,1|(959,457)|
+11,49,0,916,457,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,50,Infection,916,487,42,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,51,23,50,1,0,0,0,0,192,0,-1--1--1,,1|(800,531)|
+1,52,2,50,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,53,55,42,100,0,0,22,0,192,0,-1--1--1,,1|(1204,456)|
+1,54,55,1,4,0,0,22,0,192,0,-1--1--1,,1|(1360,456)|
+11,55,0,1276,456,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,56,Testing,1276,486,42,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,57,42,56,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,58,Testing accuracy,1278,652,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,59,58,56,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,60,42,50,1,0,0,0,0,192,0,-1--1--1,,1|(1012,551)|
+10,61,Testing Rate,1407,735,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,62,61,56,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,63,Medication Fund Percentage,59,585,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,64,63,38,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,65,Campaign Fund Percentage,447,679,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,66,65,16,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,67,Testing fund percentage,1200,982,59,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,68,67,61,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,69,23,28,1,0,0,0,0,0,0,-1--1--1,,1|(825,355)|
+10,70,Civic Factor,901,1006,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,71,70,11,1,0,0,0,0,192,0,-1--1--1,,1|(1045,974)|
+1,72,70,33,1,0,0,0,0,192,0,-1--1--1,,1|(494,829)|
+10,73,Breakthrough rate,1270,214,45,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,74,73,46,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,75,Mortality Rate,1743,263,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,76,78,4,100,0,0,22,0,192,0,-1--1--1,,1|(1964,423)|
+1,77,78,24,4,0,0,22,0,192,0,-1--1--1,,1|(2116,179)|
+11,78,0,2116,423,8,6,33,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,79,Discharged,2116,451,42,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,80,4,79,1,0,0,0,0,192,0,-1--1--1,,1|(2075,547)|
+1,81,1,9,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,82,23,10,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,83,24,10,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,84,1,10,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,85,42,10,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,86,4,10,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,87,23,29,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,88,23,33,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,89,10,11,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,90,75,8,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,91,9,22,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,92,Max Vaccine,520,228,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,93,92,28,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,94,Testing Cost,1505,854,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,95,94,61,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,96,10,56,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,97,10,50,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,98,Vaccine cost,275,179,46,26,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,99,98,31,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,100,1,8,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,101,Treatment Delay Time,2096,688,53,17,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,102,101,22,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,103,10,24,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,104,Time,956,322,23,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,105,104,28,1,0,0,0,0,64,0,-1--1--1,,1|(909,264)|
+10,106,Vaccination Start Time,959,361,54,17,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,107,106,28,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,108,10,42,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,109,24,46,1,0,0,0,0,64,0,-1--1--1,,1|(991,116)|
+1,110,35,61,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,111,Testing Start Time,1372,315,60,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,112,111,56,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,113,Time,1224,322,23,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,114,113,56,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,115,11,2,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,116,1,22,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+///---\\\
+:L<%^E!@
+1:current.vdfx
+4:Time
+5:Social Awareness Program Fund
+9:current
+19:68,0
+24:0
+25:1095
+26:1095
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

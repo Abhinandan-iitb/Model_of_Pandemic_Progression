@@ -1,0 +1,324 @@
+{UTF-8}
+ICU recovery Probability=
+	0.4
+	~	
+	~		|
+
+Death rate=
+	Death Rate Parameter*Icu cases
+	~	
+	~		|
+
+Death Rate Parameter=
+	1-ICU recovery Probability
+	~	
+	~		|
+
+Infection Rtae=
+	Suscepticle population*effective transmission rate*Infected population/MAX(  Total Population\
+		, 1)
+	~	
+	~		|
+
+Direct Recovery Rate=
+	Infected population/Recovery Time
+	~	
+	~		|
+
+effective transmission rate=
+	Transmission Rate/(1+Infected population/k)
+	~	
+	~		|
+
+Icu cases= INTEG (
+	Icu Addmision Rate-Death rate-ICU Recovery rate,
+		0)
+	~	
+	~		|
+
+Hosital recovery rate=
+	Hospital recovery probability*Hospitalized population
+	~	
+	~		|
+
+Hospital recovery probability=
+	1-Icu Probability
+	~	
+	~		|
+
+ICU Recovery rate=
+	Icu cases*ICU recovery Probability
+	~	
+	~		|
+
+Hospitalization Rate=
+	hospitalization Probability*Infected population
+	~	
+	~		|
+
+Hospitalized population= INTEG (
+	Hospitalization Rate-Hosital recovery rate-Icu Addmision Rate,
+		0)
+	~	
+	~		|
+
+Icu Addmision Rate=
+	Hospitalized population*Icu Probability
+	~	
+	~		|
+
+Public Awareness Campaign Funding=
+	(0.2)*Govt funding*Awareness campaign Effect
+	~	
+	~		|
+
+Vaccine Procurement Funding=
+	(0.2)*Govt funding
+	~	
+	~		|
+
+Recovered population= INTEG (
+	Direct Recovery Rate+Hosital recovery rate+ICU Recovery rate+VACCINATION RATE,
+		0)
+	~	
+	~		|
+
+k=
+	10000
+	~	
+	~		|
+
+VACCINATION RATE=
+	Vaccination Distribution Rate*Vaccine supply*(Suscepticle population/MAX( Total Population\
+		 , 1))
+	~	
+	~		|
+
+Govt funding= INTEG (
+	-Public Awareness Campaign Funding-Vaccine Procurement Funding,
+		1e+08)
+	~	
+	~		|
+
+Total Population=
+	Infected population+Recovered population+Suscepticle population
+	~	
+	~		|
+
+Awareness campaign Effect=
+	0.05
+	~	
+	~		|
+
+Deaths= INTEG (
+	Death rate,
+		0)
+	~	
+	~		|
+
+hospitalization Probability=
+	0.1
+	~	
+	~		|
+
+Icu Probability=
+	0.3
+	~	
+	~		|
+
+Infected population= INTEG (
+	Infection Rtae-Hospitalization Rate-Direct Recovery Rate,
+		1000)
+	~	
+	~		|
+
+Public Awareness level= INTEG (
+	Public Awareness Campaign Funding,
+		0.1)
+	~	
+	~		|
+
+Recovery Time=
+	14
+	~	
+	~		|
+
+Suscepticle population= INTEG (
+	-Infection Rtae-VACCINATION RATE,
+		100000)
+	~	
+	~		|
+
+Transmission Rate=
+	1e-07
+	~	
+	~		|
+
+Vaccination Distribution Rate=
+	0.05
+	~	
+	~		|
+
+Vaccine supply= INTEG (
+	Vaccine Procurement Funding,
+		50000)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 365
+	~	Day
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Day
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Day [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	Day [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,100,2
+10,1,Suscepticle population,141,377,55,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,Infected population,526,73,48,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,Recovered population,803,230,53,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,Hospitalized population,915,556,58,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,Icu cases,1212,331,42,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,Deaths,1463,471,42,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,Vaccine supply,195,574,42,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,8,Govt funding,561,584,42,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,Public Awareness level,564,789,55,22,3,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,12,1,100,0,0,22,0,192,0,-1--1--1,,1|(141,271)|
+1,11,12,2,4,0,0,22,0,192,0,-1--1--1,,1|(408,73)|
+11,12,0,408,271,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,13,Infection Rtae,458,271,42,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,14,16,2,100,0,0,22,0,192,0,-1--1--1,,1|(685,64)|
+1,15,16,3,4,0,0,22,0,192,0,-1--1--1,,1|(802,140)|
+11,16,0,802,64,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,17,Direct Recovery Rate,802,94,50,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,18,20,2,100,0,0,22,0,192,0,-1--1--1,,1|(526,330)|
+1,19,20,4,4,0,0,22,0,192,0,-1--1--1,,1|(693,556)|
+11,20,0,693,330,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,21,Hospitalization Rate,750,330,49,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,22,24,4,100,0,0,22,0,192,0,-1--1--1,,1|(915,327)|
+1,23,24,5,4,0,0,22,0,192,0,-1--1--1,,1|(1093,327)|
+11,24,0,1009,327,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,25,Icu Addmision Rate,1064,327,47,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,26,28,5,100,0,0,22,0,192,0,-1--1--1,,1|(1212,369)|
+1,27,28,6,4,0,0,22,0,192,0,-1--1--1,,1|(1304,471)|
+11,28,0,1304,369,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,29,Death rate,1354,369,42,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,30,32,1,100,0,0,22,0,192,0,-1--1--1,,1|(238,366)|
+1,31,32,3,4,0,0,22,0,192,0,-1--1--1,,1|(288,230)|
+11,32,0,288,366,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,33,VACCINATION RATE,344,366,48,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,34,36,8,100,0,0,22,0,192,0,-1--1--1,,1|(458,575)|
+1,35,36,7,4,0,0,22,0,192,0,-1--1--1,,1|(311,575)|
+11,36,0,391,575,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,37,Vaccine Procurement Funding,391,605,52,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,38,40,8,100,0,0,22,0,192,0,-1--1--1,,1|(560,630)|
+1,39,40,9,4,0,0,22,0,192,0,-1--1--1,,1|(560,718)|
+11,40,0,560,662,6,8,34,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,41,Public Awareness Campaign Funding,612,662,46,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,42,7,33,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,43,Transmission Rate,247,99,45,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,44,Recovery Time,854,-6,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,45,hospitalization Probability,1109,37,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,46,Icu Probability,1142,482,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,47,Death Rate Parameter,1344,189,54,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,48,Vaccination Distribution Rate,1,596,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,49,Awareness campaign Effect,228,740,52,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,50,44,17,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,51,45,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,52,46,25,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,53,47,29,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,54,48,33,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,55,Total Population,29,145,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,56,49,41,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,57,55,33,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,58,1,55,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,59,2,55,1,0,0,0,0,192,0,-1--1--1,,1|(257,22)|
+1,60,3,55,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,61,63,4,100,0,0,22,0,192,0,-1--1--1,,1|(866,432)|
+1,62,63,3,4,0,0,22,0,192,0,-1--1--1,,1|(803,324)|
+11,63,0,866,324,8,6,33,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,64,Hosital recovery rate,866,352,51,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,65,67,5,100,0,0,22,0,192,0,-1--1--1,,1|(1202,274)|
+1,66,67,3,4,0,0,22,0,192,0,-1--1--1,,1|(1025,233)|
+11,67,0,1202,233,8,6,33,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,68,ICU Recovery rate,1202,261,44,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,69,ICU recovery Probability,1249,45,58,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,70,69,68,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+10,71,Hospital recovery probability,1041,544,43,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,72,71,64,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,73,1,13,1,0,0,0,0,192,0,-1--1--1,,1|(433,368)|
+1,74,2,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,75,2,17,1,0,0,0,0,192,0,-1--1--1,,1|(623,-93)|
+1,76,2,21,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,77,4,25,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,78,46,71,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,79,69,47,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,80,5,68,1,0,0,0,0,192,0,-1--1--1,,1|(1287,276)|
+1,81,5,29,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,82,1,33,1,0,0,0,0,192,0,-1--1--1,,1|(242,394)|
+1,83,8,37,1,0,0,0,0,192,0,-1--1--1,,1|(481,521)|
+1,84,8,41,1,0,0,0,0,192,0,-1--1--1,,1|(653,605)|
+10,85,k,150,-85,42,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,86,effective transmission rate,-61,-40,53,22,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,87,43,86,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,88,85,86,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,89,86,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,90,4,64,1,0,0,0,0,192,0,-1--1--1,,1|(799,438)|
+1,91,2,86,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+1,92,55,13,0,0,0,0,0,192,0,-1--1--1,,1|(0,0)|
+///---\\\
+:L<%^E!@
+1:current.vdfx
+4:Time
+5:effective transmission rate
+9:current
+19:100,0
+24:0
+25:365
+26:365
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1
