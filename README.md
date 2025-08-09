@@ -47,7 +47,7 @@ Key flows include:
 
 ---
 
-## 📊 Key Findings
+##  Key Findings
 
 * **Timely vaccination** reduces infection peaks and stabilizes healthy population counts.
 * **Expanded testing** improves early detection, lowering spread rates.
@@ -56,7 +56,7 @@ Key flows include:
 
 ---
 
-## 🚀 How to Run
+##  How to Run
 
 1. Clone this repository:
 
@@ -75,7 +75,7 @@ Key flows include:
    python src/main.py
    ```
 
-## 📚 References
+##  References
 
 * Singh, R., Adhikari, R. (2020). *Age-structured impact of social distancing on COVID-19 in India.*
 * Venkateswaran, J., Damani, O. (2020). *Effectiveness of Testing, Tracing, Social Distancing and Hygiene in Tackling COVID-19 in India: A System Dynamics Model.*
