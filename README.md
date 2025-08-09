@@ -88,4 +88,5 @@ Key flows include:
 * **Abhinandan Kumar**
 * **Aman Sharma**
 * **Vishal Kumar Singh**
-* Guided by Prof. Om P. Damani, IIT Bombay*
+* **Guided by Prof. Om P. Damani, IIT Bombay**
+
